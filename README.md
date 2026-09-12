@@ -90,3 +90,22 @@ Enter the specifications → get an instant price estimate in **₹ (INR)**.
    python -m streamlit run streamlit_app/app.py
    ```
 The local development server will start at http://localhost:8501.
+### 📊 Dataset
+* **Source**: 🔗 [Laptop-Price-Predictor.git](https://www.kaggle.com/datasets/juanmerinobermejo/laptops-price-dataset)
+* **Observations**: ~1,300 entries
+* **Key Features**: Company, TypeName, Inches, ScreenResolution, Cpu, Ram, Memory, Gpu, OpSys, Weight
+
+### 📁 Project Structure
+```text
+Laptop-Price-Predictor/
+├── data_cleaning_model_training/
+│   └── LaptopPricePredictor.ipynb   # Exploratory analysis & model evaluation
+├── streamlit_app/
+│   ├── app.py                       # Streamlit web interface
+│   ├── pipe.pkl                     # Exported scikit-learn pipeline
+│   ├── df.pkl                       # Reference dataset metadata
+│   └── requirements.txt             # App dependencies
+└── app_screenshots/
+    ├── screenshot1.png              # UI preview (input layout)
+    └── screenshot2.png              # UI preview (prediction output)
+```
