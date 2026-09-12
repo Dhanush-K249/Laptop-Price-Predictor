@@ -1,82 +1,92 @@
 # 💻 Laptop-Price-Predictor
-An ML-powered web app that estimates a laptop's price from its specifications —built with XGBoost, scikit-learn, and Streamlit.
+
+An ML-powered web application that estimates laptop market prices from hardware specifications — built with scikit-learn, XGBoost, and Streamlit.
+
+---
 
 ## 📖 Overview
 
-Laptop prices vary wildly even for similar-looking specs, making it hard to knowif you're paying a fair price. This app uses a machine learning model trained onreal laptop data (~1,300 laptops) to predict the market price of a laptop basedon its brand, CPU, GPU, RAM, storage, display, and OS.
+Laptop prices vary significantly even for seemingly identical specifications. This project uses machine learning models trained on ~1,300 real laptop configurations to predict market prices based on brand, CPU, GPU, RAM, storage, display quality, and operating system.
 
-Enter the specs → get an instant price estimate in ₹.
+Enter the specifications → get an instant price estimate in **₹ (INR)**.
+
+---
 
 ## 🖼️ Screenshots
-![Dashboard Preview](screenshot1.png)
-![Dashboard Preview](screenshot2.png)
 
-##✨ Features
-1.🏷️ Select Company, Laptop Type, CPU brand, GPU brand, and OS from dropdowns
-2.⚙️ Configure RAM, Weight, Screen Size (inches), Resolution (PPI), Touchscreen & IPS display
-3.💾 Choose HDD / SSD storage combinations
-4.⚡ Instant price prediction using a tuned XGBoost model
-5.📊 Model trained with log-transformed target for better accuracy on a wide price range
+| Specification Inputs | Price Estimation |
+| :---: | :---: |
+| ![Dashboard Input](app_screenshots/screenshot1.png) | ![Prediction Result](app_screenshots/screenshot2.png) |
+
+---
+
+## ✨ Features
+
+* **Brand & System Selection:** Company, Laptop Type, CPU brand, GPU brand, and OS dropdowns.
+* **Display & Build Config:** RAM, Weight, Screen Size (inches), PPI resolution, Touchscreen, and IPS options.
+* **Hybrid Storage:** Flexible HDD and SSD storage combinations.
+* **Tuned Inference:** Fast prediction pipeline using an optimized ensemble regressor.
+* **Log-Transformed Target:** Mitigates right-skewed pricing distributions for balanced error rates across budget and flagship tiers.
+
+---
 
 ## 🛠️ Tech Stack
 
-Language - Python 3.x
-ML Model - XGBoost (XGBRegressor), Random Forest, Adabost, GraradientBoost, LinearRegressor, VotingRegressor.
-Preprocessing - scikit-learn (OneHotEncoder, ColumnTransformer, Pipeline)
-Web App - Streamlit
-Data Handling -	pandas, NumPy
-Serialization - pickle
+| Domain | Technologies |
+| :--- | :--- |
+| **Language** | Python 3.9+ |
+| **ML Models** | XGBoost, Random Forest, Gradient Boosting, AdaBoost, VotingRegressor |
+| **Preprocessing** | scikit-learn (`OneHotEncoder`, `ColumnTransformer`, `Pipeline`) |
+| **Data Handling** | pandas, NumPy |
+| **Web Interface** | Streamlit |
+| **Serialization** | pickle |
+
+---
 
 ## 🧠 Model & Approach
 
 ### Preprocessing
+* **Categorical Encoding:** `OneHotEncoder` applied to `Company`, `TypeName`, `Cpu brand`, `Gpu brand`, and `os`.
+* **Numerical Features:** Passed through directly (`Ram`, `Weight`, `Touchscreen`, `Ips`, `ppi`, `HDD`, `SSD`).
+* **Target Transformation:** $\log(y)$ applied during training via `np.log1p` to stabilize variance, then exponentiated via `np.expm1` at inference.
+* **Export:** Packaged inside a unified `Pipeline` object containing both the preprocessor and estimator.
 
-One-Hot Encoding of categorical features: Company, TypeName, CPU brand, GPU brand, OS
-Numerical features (RAM, Weight, PPI, HDD, SSD, etc.) passed through
-Target (Price) log-transformed to handle skew, inverse-transformed at prediction time
-Wrapped in a single scikit-learn Pipeline → preprocessing + model in one artifact
+### Benchmark Results
 
-## Model
+| Model | $R^2$ Score | MAE |
+| :--- | :---: | :---: |
+| **VotingRegressor (RF + GBDT + XGB)** | **0.9037** | **1.1560** |
+| XGBoost Regressor | 0.9020 | 1.1538 |
+| Gradient Boosting Regressor | 0.8948 | 1.1640 |
+| Random Forest Regressor | 0.8880 | 1.1690 |
+| Extra Trees Regressor | 0.8848 | 1.1740 |
+| AdaBoost Regressor | 0.8488 | 1.2168 |
+| Ridge Regression | 0.8120 | 1.2330 |
+| Linear Regression | 0.8070 | 1.2330 |
 
-Final model - RandomForestRegressor(n_estimators=300,random_state=42,max_samples=0.63,max_features=0.64,max_depth=13)
-Model | R² Score | MAE
-RandomForestRegressor | 0.888 | 1.169
-ExtraTreesRegressor | 0.8848 | 1.174
-GradientBoostingRegressor | 0.8948 | 1.164
-XGBoostRegressor |  0.902 | 1.1538
-AdaBoostRegressor | 0.8488 | 1.2168
-VotingRegressor(RandomForest,GradientBoost,XGBoost) | 0.9037 | 1.156
-LinearRegressor | 0.8070 | 1.233
-Ridge | 0.812 | 1.233
+> **Final Estimator:** Tuned `RandomForestRegressor(n_estimators=300, max_samples=0.63, max_features=0.64, max_depth=13, random_state=42)` alongside the ensemble configurations.
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-Python 3.9+
+* Python 3.9 or higher
+* Git
 
 ### Installation
-Clone the repositorygit clone https://github.com/[your-username]/Laptop-Price-Predictor.gitcd laptop-price-predictor Install dependencies
-```bash
-pip install -r streamlit_app/requirements.txt
-python -m streamlit run app.py
-```
-The app will open at http://localhost:8501.
 
-## 📊 Dataset
-Source: 🔗 [laptopPriceDataset](https://www.kaggle.com/datasets/juanmerinobermejo/laptops-price-dataset)
-Size: ~1,300 laptops
-Features: Company, TypeName, RAM (GB), Weight (kg), Touchscreen, IPS Panel,Screen Resolution (PPI), CPU brand, HDD (GB), SSD (GB), GPU brand, OS
-
-## 📁 Project Structure
-```text
-├── data_cleaning_model_training/           # Python cleaning & model training
-│   ├── LaptopPricePredictor.ipynb
-│
-├── streamlit_app/              # run the streamlit app in python
-│   ├── app.py
-│   └── requirements.txt
-│
-└── app_screenshots/
-│   ├── screenshot1.png
-    ├── screenshot2.png        # Streamlit app screenshots
-```
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/](https://github.com/)[Dhanush-K249]/Laptop-Price-Predictor.git
+   cd Laptop-Price-Predictor
+   ```
+2. **Install Dependencies:**
+   ```bash
+   pip install -r streamlit_app/requirements.txt
+   ```
+3. **Run the streamlip app**
+   ```bash
+   python -m streamlit run streamlit_app/app.py
+   ```
+The local development server will start at http://localhost:8501.
